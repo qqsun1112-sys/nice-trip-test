@@ -1,0 +1,40 @@
+name: NICE TRIP Test Preview
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout test version
+        uses: actions/checkout@v4
+        with:
+          repository: qqsun1112-sys/nice-trip
+          ref: test/mobile-header-cleanup-20261008
+          path: site
+          persist-credentials: false
+      - name: Prepare preview
+        run: |
+          rm -f site/CNAME
+          printf 'User-agent: *\nDisallow: /\n' > site/robots.txt
+          touch site/.nojekyll
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload preview
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
+  
